@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { BookOpen, Cpu, LayoutDashboard, ListTree, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 import { useSession, useSignOut } from '../api/queries';
@@ -26,17 +26,33 @@ export function AppShell() {
   const runPage = location.pathname.startsWith('/runs/');
   const title = location.pathname.startsWith('/runs') ? 'Runs' : location.pathname.startsWith('/system') ? 'System' : 'Dashboard';
   const navigation = (compact: boolean) => <>
-    <div className="sidebar-brand">{compact ? <Link to="/dashboard" aria-label="TraceGuard dashboard" className="brand-symbol">TG</Link> : <Brand to="/dashboard" />}</div>
+    <div className="sidebar-brand">
+      {compact ? <Link to="/dashboard" aria-label="TraceGuard dashboard" className="brand-symbol">TG</Link> : <Brand to="/dashboard" />}
+    </div>
+    {!compact && (
+      <div className="sidebar-workspace">
+        <span className="workspace-badge" aria-hidden="true">TG</span>
+        <div className="workspace-meta">
+          <span className="workspace-name">Multi-Agent Prod</span>
+          <span className="workspace-scope">Production</span>
+        </div>
+      </div>
+    )}
     <nav className="sidebar-nav" aria-label="Main navigation">
-      <NavLink to="/dashboard" title="Dashboard"><LayoutDashboard size={16} />{!compact && 'Dashboard'}</NavLink>
-      <NavLink to="/runs" title="Runs"><ListTree size={16} />{!compact && 'Runs'}</NavLink>
+      <NavLink to="/dashboard" title="Dashboard"><LayoutDashboard size={16} />{!compact && <span>Dashboard</span>}</NavLink>
+      <NavLink to="/runs" title="Runs"><ListTree size={16} />{!compact && <span>Runs</span>}</NavLink>
       {!compact && <div className="nav-group">Resources</div>}
-      <NavLink to="/docs/introduction" title="Documentation"><BookOpen size={16} />{!compact && 'Documentation'}</NavLink>
-      <NavLink to="/system" title="System"><Cpu size={16} />{!compact && 'System'}</NavLink>
+      <NavLink to="/docs/introduction" title="Documentation"><BookOpen size={16} />{!compact && <span>Documentation</span>}</NavLink>
+      <NavLink to="/system" title="System"><Cpu size={16} />{!compact && <span>System</span>}</NavLink>
     </nav>
     <div className="account">
       <span className="avatar" aria-hidden="true">{session.username.slice(0, 1).toUpperCase()}</span>
-      {!compact && <span className="account-name">{session.username}</span>}
+      {!compact && (
+        <div className="account-details">
+          <span className="account-name">{session.username}</span>
+          <span className="account-role">Engineer</span>
+        </div>
+      )}
       <button type="button" className="icon-button" aria-label="Sign out" title="Sign out" onClick={handleSignOut} disabled={signOut.isPending}><LogOut size={15} /></button>
     </div>
   </>;
@@ -56,7 +72,13 @@ export function AppShell() {
           </button>
           <nav aria-label="Breadcrumb" className="breadcrumb">{runPage ? <><Link to="/runs">Runs</Link><span aria-hidden="true">/</span><span>Run details</span></> : <span>{title}</span>}</nav>
         </div>
-        <ThemeControl />
+        <div className="topbar-end">
+          <div className="topbar-telemetry" title="Automated verification pipeline is listening">
+            <span className="telemetry-dot" aria-hidden="true" />
+            <span className="telemetry-label">Pipeline active</span>
+          </div>
+          <ThemeControl />
+        </div>
       </header>
       <main id="main-content" className="app-main" tabIndex={-1}><Outlet /></main>
     </div>

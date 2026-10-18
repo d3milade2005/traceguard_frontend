@@ -1,4 +1,4 @@
-﻿import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { RunSummary } from '../types/api';
 import { attentionIssue, formatTime, formatUtcTimestamp, sentenceCase, stageLabels, StatusText } from './StatusText';
 
@@ -15,7 +15,7 @@ export function RunRow({ run, view = 'ledger' }: { run: RunSummary; view?: RunTa
     <td className="run-cell"><Link to={href} className="run-link">{run.run_id}</Link><span className="mobile-run-note">{view === 'attention' ? attentionIssue(run) : run.responsible_agent ?? 'Agent pending'}</span></td>
     {view === 'attention' ? <td className="issue-cell">{attentionIssue(run)}</td> : <td className="stage-cell">{view === 'recent' ? stageLabels[run.current_stage] : <StatusText value={run.stage_status} />}</td>}
     <td className="agent-cell">{run.responsible_agent ?? <span className="muted">Pending</span>}</td>
-    {view === 'ledger' && <td className="confidence-cell muted">{run.confidence ? sentenceCase(run.confidence) : '—'}</td>}
+    {view === 'ledger' && <td className="confidence-cell muted">{run.confidence ? sentenceCase(run.confidence) : '-'}</td>}
     <td className="result-cell"><StatusText value={view === 'attention' ? run.stage_status === 'failed' ? 'failed' : 'review_required' : run.validation_verdict} /></td>
     <td className="time-cell"><time dateTime={run.created_at} title={formatUtcTimestamp(run.created_at)}>{formatTime(run.created_at)}</time></td>
   </tr>;
