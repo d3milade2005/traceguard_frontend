@@ -191,7 +191,7 @@ export function LandingPage() {
                   <Cpu size={13} className="text-muted" />
                   <span>Subsystem: <strong>{activeStep.agent}</strong></span>
                 </div>
-                <Link to="/runs/run_9f82a4c1" className="terminal-action">
+                <Link to="/runs" className="terminal-action">
                   Inspect in workspace
                   <ArrowRight size={13} />
                 </Link>
@@ -218,7 +218,7 @@ export function LandingPage() {
                 TraceGuard isolated the exact step, generated a reproduction test, and confirmed the fix.
               </p>
               <div className="example-actions-row">
-                <Link className="button button-quiet" to="/runs/run_9f82a4c1">
+                <Link className="button button-quiet" to="/runs">
                   Inspect full run
                   <ArrowRight size={14} />
                 </Link>
@@ -254,4 +254,3 @@ export function LandingPage() {
     </div>
   );
 }
-

@@ -33,8 +33,8 @@ export function AppShell() {
       <div className="sidebar-workspace">
         <span className="workspace-badge" aria-hidden="true">TG</span>
         <div className="workspace-meta">
-          <span className="workspace-name">Multi-Agent Prod</span>
-          <span className="workspace-scope">Production</span>
+          <span className="workspace-name">Local workspace</span>
+          <span className="workspace-scope">Development</span>
         </div>
       </div>
     )}
@@ -73,9 +73,9 @@ export function AppShell() {
           <nav aria-label="Breadcrumb" className="breadcrumb">{runPage ? <><Link to="/runs">Runs</Link><span aria-hidden="true">/</span><span>Run details</span></> : <span>{title}</span>}</nav>
         </div>
         <div className="topbar-end">
-          <div className="topbar-telemetry" title="Automated verification pipeline is listening">
+          <div className="topbar-telemetry" title="Local development access; GitHub authentication deferred">
             <span className="telemetry-dot" aria-hidden="true" />
-            <span className="telemetry-label">Pipeline active</span>
+            <span className="telemetry-label">Local access</span>
           </div>
           <ThemeControl />
         </div>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Menu, X } from 'lucide-react';
 import { useSession } from '../api/queries';
@@ -27,7 +27,7 @@ function QuickStart() {
   -H "Content-Type: application/json" \\
   -d @failed_multi_agent_trace.json`} /></section>
     <section id="inspect-attribution"><h2>2. Inspect attribution and context</h2><p>Open <code>/runs/:runId</code>. Start with the responsible agent and explanation, then follow the decisive step into the trace.</p><p>Use the evidence links to inspect supporting steps. Select Context in the pipeline to review the model's analysis window, omitted ranges, and exact byte sizes.</p></section>
-    <section id="verify-pytest"><h2>3. Verify the regression</h2><p>Open Validation and confirm that the run has a <strong>Valid regression</strong>: the faulty implementation failed as expected, and the corrected implementation passed.</p><p>Inspect the execution details when either result needs review. Open Generated test to copy or download the source for your repository's test suite.</p><p>The raw backend verdict remains <code>validated</code>; the workspace presents a human-readable label.</p></section></>;
+    <section id="verify-pytest"><h2>3. Verify the regression</h2><p>Open Validation and confirm that the run has a <strong>Valid regression</strong>: the faulty implementation failed as expected, and the corrected implementation passed.</p><p>Inspect the execution details when either result needs review. Open Generated test to copy or download the source for your repository's test suite.</p><p>The raw backend verdict remains <code>valid</code>; the workspace presents a human-readable label.</p></section></>;
 }
 export function DocsPage() {
   const { slug = 'introduction' } = useParams<{ slug: string }>();
@@ -45,4 +45,3 @@ export function DocsPage() {
     </article></main><aside className="docs-toc">{available && <nav aria-label="On this page"><p>On this page</p>{toc.map(item => <a href={`#${item.id}`} key={item.id}>{item.label}</a>)}</nav>}</aside></div>
   </div>;
 }
-

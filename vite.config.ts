@@ -6,7 +6,6 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // TODO(backend-integration): Confirm FastAPI port and /api/v1 prefix
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,

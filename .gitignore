@@ -42,3 +42,5 @@ Thumbs.db
 # Cache
 .eslintcache
 .vite/
+__pycache__/
+artifacts/

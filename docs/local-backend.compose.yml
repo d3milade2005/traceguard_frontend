@@ -1,0 +1,8 @@
+# Apply after the backend's docker-compose.yml. Local development only.
+services:
+  backend:
+    environment:
+      APP_ENV: development
+      DEBUG: "false"
+      DEV_READ_ACCESS: "true"
+      CORS_ALLOWED_ORIGINS: '["http://localhost:5173"]'

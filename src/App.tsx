@@ -9,12 +9,14 @@ import { LoginPage } from './pages/LoginPage';
 import { RunDetailPage } from './pages/RunDetailPage';
 import { RunsPage } from './pages/RunsPage';
 import { SystemPage } from './pages/SystemPage';
+import { ApiError } from './api/client';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       staleTime: 30 * 1000,
+      retry: (attempt, error) => error instanceof ApiError && (error.status === 0 || error.status >= 500) && attempt < 1,
     },
   },
 });

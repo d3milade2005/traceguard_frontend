@@ -680,6 +680,7 @@ button svg, a svg { flex-shrink: 0; }
   font-variant-numeric: tabular-nums;
 }
 .mobile-run-note { display: none; }
+.run-cell > .run-source { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
 
 /* Status Text & Indicators */
 .status {
@@ -822,6 +823,14 @@ select option { background: var(--surface); color: var(--text); }
   background: var(--canvas-alt);
 }
 .pagination > div { display: flex; gap: 8px; }
+
+/* Real API filters and pagination must remain readable at narrow widths. */
+.runs-toolbar { flex-wrap: wrap; }
+.toolbar-filters { flex: 1 1 440px; flex-wrap: wrap; }
+.toolbar-filters .select-wrapper { flex: 1 1 130px; min-width: 0; }
+.toolbar-filters .select-wrapper select { width: 100%; }
+.toolbar-filters > label { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+.pagination, .pagination > div { flex-wrap: wrap; gap: 8px; }
 
 .empty-state {
   padding: 44px 20px;
@@ -968,6 +977,7 @@ select option { background: var(--surface); color: var(--text); }
 .pipeline-step.pipeline-failed { color: var(--red); }
 .pipeline-step.pipeline-failed svg { opacity: 1; color: var(--red); }
 .pipeline-step.pipeline-running { color: var(--amber); }
+.pipeline-step.pipeline-review_required { color: var(--amber); }
 
 /* Run Overview & Failure Summary */
 .run-overview {

@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Copy, Moon, Sun, Workflow } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { ApiError } from '../api/client';
+
+export function QueryError({ title, query }: { title: string; query: { error: unknown; refetch: () => unknown } }) {
+  const error = query.error;
+  return <div><EmptyState title={title} retry={() => void query.refetch()} />{error instanceof ApiError && <details className="disclosure"><summary>Error details</summary><p className="metadata">{error.code}{error.requestId ? ` · Request ${error.requestId}` : ''}</p></details>}</div>;
+}
 
 export function Brand({ to = '/' }: { to?: string }) {
   return <Link to={to} className="brand"><Workflow size={21} strokeWidth={1.7} aria-hidden="true" /><span>TraceGuard</span></Link>;

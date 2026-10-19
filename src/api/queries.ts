@@ -1,124 +1,72 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  DashboardSummary,
-  RunDetail,
-  RunSummary,
-  SystemStatus,
-} from '../types/api';
+import { AnalysisRecord, AttributionResult, CanonicalTrace, DashboardSummary, Json, PyTestArtifact, RegressionRecord, RunPage, RunRecord, RunSummary, SystemStatus, ValidationResult } from '../types/api';
 import { fetchCurrentSession, signOutSession } from './auth';
-import { apiFetch, USE_MOCK_API } from './client';
-import {
-  getMockRunDetail,
-  MOCK_DASHBOARD_SUMMARY,
-  MOCK_RUN_SUMMARIES,
-  MOCK_SYSTEM_STATUS,
-} from './mockData';
+import { apiFetch } from './client';
 
+const active = (status?: string | null) => ['pending', 'queued', 'processing', 'active'].includes(status ?? '');
+const POLL_MS = 5000;
+const MAX_POLLS = 120;
 export function useSession() {
-  return useQuery({
-    queryKey: ['auth', 'me'],
-    queryFn: fetchCurrentSession,
-    staleTime: 5 * 60 * 1000,
-    retry: false,
-  });
+  return useQuery({ queryKey: ['local-access'], queryFn: fetchCurrentSession, staleTime: Infinity });
 }
-
 export function useSignOut() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: signOutSession,
-    onSuccess: () => {
-      queryClient.setQueryData(['auth', 'me'], null);
-      queryClient.clear();
-    },
-  });
+  const client = useQueryClient();
+  return useMutation({ mutationFn: signOutSession, onSuccess: () => client.clear() });
 }
-
 export function useDashboardSummary() {
   return useQuery({
-    queryKey: ['dashboard', 'summary'],
-    queryFn: async (): Promise<DashboardSummary> => {
-      if (USE_MOCK_API) {
-        return MOCK_DASHBOARD_SUMMARY;
-      }
-      // TODO(backend-integration): Reconcile with GET /api/v1/dashboard or GET /api/v1/runs aggregation
-      return apiFetch<DashboardSummary>('/api/v1/dashboard');
-    },
+    queryKey: ['dashboard'], queryFn: ({ signal }) => apiFetch<DashboardSummary>('/dashboard', { signal }),
+    refetchInterval: q => !q.state.error && q.state.data?.active_analyses && q.state.dataUpdateCount < MAX_POLLS ? POLL_MS : false,
   });
 }
-
 export interface RunsFilterParams {
-  search?: string;
-  confidence?: string;
-  verdict?: string;
-  page?: number;
+  limit: number; offset: number; status?: RunSummary['status']; analysis_status?: RunSummary['analysis_status'];
+  responsible_agent?: string; validation_verdict?: RunSummary['validation_verdict']; needs_attention?: boolean;
 }
-
 export function useRunsList(params: RunsFilterParams) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => { if (value !== undefined && value !== null && value !== '') query.set(key, String(value)); });
   return useQuery({
     queryKey: ['runs', 'list', params],
-    queryFn: async (): Promise<{ items: RunSummary[]; total: number }> => {
-      if (USE_MOCK_API) {
-        const filtered = MOCK_RUN_SUMMARIES.filter((run) => {
-          if (params.search) {
-            const q = params.search.toLowerCase();
-            const matchesId = run.run_id.toLowerCase().includes(q);
-            const matchesAgent = (run.responsible_agent ?? '').toLowerCase().includes(q);
-            if (!matchesId && !matchesAgent) return false;
-          }
-          if (params.confidence && params.confidence !== 'all') {
-            if (run.confidence !== params.confidence) return false;
-          }
-          if (params.verdict && params.verdict !== 'all') {
-            if (run.validation_verdict !== params.verdict) return false;
-          }
-          return true;
-        });
-
-        return { items: filtered, total: filtered.length };
-      }
-
-      // TODO(backend-integration): Confirm query parameter names on GET /api/v1/runs
-      const searchParams = new URLSearchParams();
-      if (params.search) searchParams.set('q', params.search);
-      if (params.confidence && params.confidence !== 'all') {
-        searchParams.set('confidence', params.confidence);
-      }
-      if (params.verdict && params.verdict !== 'all') {
-        searchParams.set('verdict', params.verdict);
-      }
-      if (params.page) searchParams.set('page', String(params.page));
-
-      return apiFetch<{ items: RunSummary[]; total: number }>(
-        `/api/v1/runs?${searchParams.toString()}`
-      );
-    },
+    staleTime: 0,
+    queryFn: ({ signal }) => apiFetch<RunPage>(`/runs?${query}`, { signal }),
+    refetchInterval: q => !q.state.error && q.state.data?.items.some(r => active(r.status) || r.analysis_status === 'active') && q.state.dataUpdateCount < MAX_POLLS ? POLL_MS : false,
   });
 }
-
+function useArtifact<T extends { status: string }>(kind: string, id?: string | null) {
+  return useQuery({
+    queryKey: [kind, id],
+    queryFn: ({ signal }) => apiFetch<T>(`/${kind}/${encodeURIComponent(id!)}`, { signal }),
+    enabled: Boolean(id), staleTime: Infinity,
+    refetchInterval: q => !q.state.error && active(q.state.data?.status) && q.state.dataUpdateCount < MAX_POLLS ? POLL_MS : false,
+  });
+}
 export function useRunDetail(runId: string) {
-  return useQuery({
-    queryKey: ['runs', 'detail', runId],
-    queryFn: async (): Promise<RunDetail> => {
-      if (USE_MOCK_API) {
-        return getMockRunDetail(runId);
-      }
-      // TODO(backend-integration): Confirm composite GET /api/v1/runs/{run_id} schema
-      return apiFetch<RunDetail>(`/api/v1/runs/${encodeURIComponent(runId)}`);
-    },
-    enabled: Boolean(runId),
+  const run = useQuery({
+    queryKey: ['runs', 'detail', runId], enabled: Boolean(runId),
+    queryFn: ({ signal }) => apiFetch<RunRecord>(`/runs/${encodeURIComponent(runId)}`, { signal }),
+    refetchInterval: q => !q.state.error && (active(q.state.data?.status) || q.state.data?.analysis_status === 'active') && q.state.dataUpdateCount < MAX_POLLS ? POLL_MS : false,
   });
+  const analysis = useQuery({
+    queryKey: ['analysis', runId], enabled: Boolean(run.data?.analysis_id),
+    queryFn: ({ signal }) => apiFetch<AnalysisRecord>(`/runs/${encodeURIComponent(runId)}/analysis`, { signal }),
+    refetchInterval: q => !q.state.error && q.state.data?.status === 'active' && q.state.dataUpdateCount < MAX_POLLS ? POLL_MS : false,
+  });
+  const ids = analysis.data ?? run.data;
+  const attribution = useArtifact<AttributionResult>('attributions', ids?.attribution_id);
+  const regression = useArtifact<RegressionRecord>('regression-specs', ids?.regression_spec_id);
+  const generated = useArtifact<PyTestArtifact>('generated-tests', ids?.generated_test_id);
+  const validation = useArtifact<ValidationResult>('validations', ids?.validation_id);
+  const trace = useQuery({
+    queryKey: ['trace', runId], enabled: run.data?.status === 'normalized', staleTime: Infinity,
+    queryFn: ({ signal }) => apiFetch<CanonicalTrace>(`/runs/${encodeURIComponent(runId)}/trace`, { signal }),
+  });
+  const original = useQuery({
+    queryKey: ['original-trace', runId], enabled: Boolean(run.data), staleTime: Infinity,
+    queryFn: ({ signal }) => apiFetch<Json>(`/runs/${encodeURIComponent(runId)}/original-trace`, { signal }),
+  });
+  return { run, analysis, attribution, regression, generated, validation, trace, original };
 }
-
 export function useSystemStatus() {
-  return useQuery({
-    queryKey: ['system', 'status'],
-    queryFn: async (): Promise<SystemStatus> => {
-      if (USE_MOCK_API) {
-        return MOCK_SYSTEM_STATUS;
-      }
-      // TODO(backend-integration): Confirm GET /api/v1/system response fields
-      return apiFetch<SystemStatus>('/api/v1/system');
-    },
-  });
+  return useQuery({ queryKey: ['system'], queryFn: ({ signal }) => apiFetch<SystemStatus>('/system', { signal }) });
 }
