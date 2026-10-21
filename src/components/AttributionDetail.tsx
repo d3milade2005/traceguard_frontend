@@ -5,6 +5,8 @@ import { ModelDetails } from './ModelDetails';
 import { CodeBlock } from './UI';
 export function AttributionDetail({ attribution, onSelectEvidence, onSelectStep }: { attribution: AttributionResult; onSelectEvidence: (e: EvidenceRange) => void; onSelectStep: (s: number) => void }) {
   return <div className="stage-panel"><h2>Attribution</h2>
+    {attribution.status === 'failed' && <p className="context-warning">Attribution failed: {attribution.failure_code ?? 'Unknown failure'}. No model prediction was returned.</p>}
+    <p className="detail-note">Requested model: {attribution.model} · Reasoning effort: {attribution.reasoning_effort}</p>
     <dl className="detail-list attribution-fields">
       <div><dt>Status</dt><dd><StatusText value={attribution.status}/></dd></div>
       <div><dt>Responsible agent</dt><dd>{attribution.responsible_agent ?? '—'}</dd></div>

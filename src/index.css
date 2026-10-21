@@ -1195,7 +1195,7 @@ select option { background: var(--surface); color: var(--text); }
   position: relative;
   width: 100%;
   display: grid;
-  grid-template-columns: 14px 38px 120px 70px minmax(0, 1fr) auto;
+  grid-template-columns: 14px 38px 190px 70px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   padding: 11px 8px;

@@ -76,7 +76,7 @@ function RunWorkspace({ runId }: { runId: string }) {
         {Object.entries({ Created: formatUtcTimestamp(run.created_at), Updated: formatUtcTimestamp(run.updated_at), Finished: analysis.data?.finished_at ? formatUtcTimestamp(analysis.data.finished_at) : '—', Model: analysis.data?.model ?? '—', 'Reasoning effort': analysis.data?.reasoning_effort ?? '—', 'Stop reason': reason ?? '—', 'Failure code': run.failure_code ?? '—' }).map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{value}</dd></div>)}
       </dl><h3>Pipeline states</h3><dl className="detail-list">{stages.map(stage => <div key={stage.key}><dt>{stageLabels[stage.key]}</dt><dd><StatusText value={stage.status}/></dd></div>)}</dl></div></details></div>
     </header>
-    {reason && <p className="context-warning" role="status">{stopMessage(reason)}</p>}
+    {reason && state !== 'completed' && <p className="context-warning" role="status">{stopMessage(reason)}</p>}
     {analysis.isError && <QueryError title="Unable to load this analysis." query={analysis}/>}
     {!run.analysis_id && <p className="detail-note">No analysis has been requested for this run.</p>}
     <PipelineStepper stages={stages} activeStage={activeStage} onSelectStage={selectStage}/>

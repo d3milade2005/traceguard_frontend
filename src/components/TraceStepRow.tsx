@@ -15,7 +15,9 @@ export function TraceStepRow({ step, isDecisive, isEvidence, visibility, isExpan
     {isExpanded && <div id={`payload-${step.sequence}`} className="trace-payload">
       <div className="payload-heading"><span>{isDecisive ? 'Decisive step' : isEvidence ? 'Evidence' : sentenceCase(step.event_type)}</span><span>{step.status ?? '—'}</span></div>
       {visibility && <p className={visibility === 'included' ? 'detail-note' : 'context-warning'}>{visibility === 'truncated' ? 'This step was truncated for the model. The complete canonical payload is shown below; the historical excerpt body is unavailable.' : visibility === 'omitted' ? 'This step was omitted from model context. The canonical payload is shown below.' : 'Complete step selected for model context.'}</p>}
-      <CodeBlock label={`Step ${step.sequence} canonical payload`} source={JSON.stringify(step, null, 2)}/>
+      {step.output !== null && <><h3>Output produced</h3><CodeBlock label={`Step ${step.sequence} output`} source={typeof step.output === 'string' ? step.output : JSON.stringify(step.output, null, 2)}/></>}
+      {step.input !== null && <details className="disclosure"><summary>Inputs received</summary><CodeBlock label={`Step ${step.sequence} input`} source={typeof step.input === 'string' ? step.input : JSON.stringify(step.input, null, 2)}/></details>}
+      <details className="disclosure"><summary>Complete canonical payload</summary><CodeBlock label={`Step ${step.sequence} canonical payload`} source={JSON.stringify(step, null, 2)}/></details>
     </div>}
   </div>;
 }
