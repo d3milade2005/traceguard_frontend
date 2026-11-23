@@ -16,7 +16,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   if (init?.body) headers.set('Content-Type', 'application/json');
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers });
+    response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers, credentials: 'include' });
   } catch (error) {
     if (init?.signal?.aborted) throw error;
     throw new ApiError(0, 'BACKEND_UNAVAILABLE');

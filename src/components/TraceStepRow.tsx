@@ -5,7 +5,7 @@ import { CodeBlock } from './UI';
 interface Props { step: CanonicalStep; isDecisive: boolean; isEvidence: boolean; visibility?: string; isExpanded: boolean; onToggle: () => void }
 export function TraceStepRow({ step, isDecisive, isEvidence, visibility, isExpanded, onToggle }: Props) {
   const preview = typeof step.output === 'string' ? step.output : typeof step.input === 'string' ? step.input : step.tool_name ?? step.status ?? '';
-  return <div id={`trace-step-${step.sequence}`} className={`trace-row ${isDecisive ? 'trace-decisive' : ''} ${step.status === 'failed' ? 'trace-error' : ''}`}>
+  return <div id={`trace-step-${step.sequence}`} className={`trace-row ${isDecisive ? 'trace-decisive' : ''} ${['failed', 'error'].includes(step.status ?? '') ? 'trace-error' : ''}`}>
     <button className="trace-row-button" onClick={onToggle} aria-expanded={isExpanded} aria-controls={`payload-${step.sequence}`}>
       <span className="trace-chevron">{isExpanded ? <ChevronDown size={13}/> : <ChevronRight size={13}/>}</span>
       <span className="trace-sequence"><span className={`trace-gutter ${isEvidence ? 'has-evidence' : ''}`} aria-hidden="true"/>#{step.sequence}</span>
